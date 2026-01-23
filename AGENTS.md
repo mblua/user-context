@@ -12,15 +12,16 @@ Este repositorio contiene contexto personal y conocimiento para agentes de IA qu
 
 | Archivo | Descripcion | Contenido Principal |
 |---------|-------------|---------------------|
-| `README.md` | Contexto personal del usuario | Datos basicos (nombre, ubicacion, timezone), horario laboral (9:00-20:00), compromisos con hijo Facundo (custodia 50/50, horarios de busqueda), familia (pareja Josefina, mama Elsa Mujica) |
+| `README.md` | Indice del repositorio | Lista de archivos y sus propositos |
+| `USER_CONTEXT.md` | Contexto personal del usuario | Datos basicos (nombre, ubicacion, timezone), horario laboral (9:00-20:00), compromisos con hijo Facundo (custodia 50/50, horarios de busqueda), familia (pareja Josefina, mama Elsa Mujica) |
 | `AGENTS.md` | Conocimiento tecnico para agentes | Indice del repositorio, tecnicas de edicion de archivos en GitHub via web |
 | `TO-DOs.md` | Lista de tareas pendientes | Actualmente vacio - usar para trackear tareas futuras |
 
 ### Instrucciones para LLMs
 
-1. **Al iniciar una conversacion**: Leer `README.md` para obtener contexto personal del usuario
+1. **Al iniciar una conversacion**: Leer `USER_CONTEXT.md` para obtener contexto personal del usuario
 2. **Para tareas tecnicas**: Consultar las secciones relevantes de `AGENTS.md`
-3. **Para agregar informacion nueva**: Actualizar `README.md` inmediatamente segun las instrucciones de enforcement en ese archivo
+3. **Para agregar informacion nueva**: Actualizar `USER_CONTEXT.md` inmediatamente segun las instrucciones de enforcement en ese archivo
 4. **Para tareas pendientes**: Usar `TO-DOs.md` para trackear items
 
 ---
