@@ -14,7 +14,7 @@ Este repositorio contiene contexto personal y conocimiento para agentes de IA qu
 |---------|-------------|---------------------|
 | `README.md` | Indice del repositorio | Lista de archivos y sus propositos |
 | `USER_CONTEXT.md` | Contexto personal del usuario | Datos basicos (nombre, ubicacion, timezone), horario laboral (9:00-20:00), compromisos con hijo Facundo (custodia 50/50, horarios de busqueda), familia (pareja Josefina, mama Elsa Mujica) |
-| `AGENTS.md` | Conocimiento tecnico para agentes | Indice del repositorio, edicion de archivos en GitHub via API REST |
+| `AGENTS.md` | Conocimiento tecnico para agentes | Indice del repositorio, metodos de edicion de archivos en GitHub (API REST y web) |
 | `TO-DOs.md` | Lista de tareas pendientes | Actualmente vacio - usar para trackear tareas futuras |
 
 ### Instrucciones para LLMs
@@ -26,9 +26,20 @@ Este repositorio contiene contexto personal y conocimiento para agentes de IA qu
 
 ---
 
-## Edicion de archivos en GitHub via API REST
+## Edicion de archivos en GitHub
 
-### Ventajas sobre el metodo web
+Existen dos metodos para editar archivos en este repositorio. Usar el apropiado segun el contexto:
+
+| Agente | Metodo | Razon |
+|--------|--------|-------|
+| **Claude Code** (CLI) | API REST | Tiene acceso a curl y bash, mas rapido y confiable |
+| **Claude for Chrome** (extension) | Web/JavaScript | Solo tiene acceso al navegador, no puede usar curl |
+
+---
+
+## Metodo 1: API REST (para Claude Code)
+
+### Ventajas
 
 - No requiere navegador ni automatizacion de UI
 - Evita problemas de auto-formateo del editor web
@@ -82,29 +93,6 @@ curl -s --ssl-no-revoke -X PUT \
 
 Igual que actualizar, pero sin el campo `sha`.
 
-### Ejemplo completo de flujo
-
-```bash
-# 1. Leer token
-TOKEN=$(tail -1 C:\Users\maria\.claude\github_token.txt)
-
-# 2. Obtener archivo actual y extraer SHA
-SHA=$(curl -s --ssl-no-revoke \
-  -H "Authorization: Bearer $TOKEN" \
-  https://api.github.com/repos/mblua/user-context/contents/ARCHIVO.md \
-  | jq -r '.sha')
-
-# 3. Crear nuevo contenido en base64
-CONTENT=$(echo "Nuevo contenido" | base64 -w 0)
-
-# 4. Actualizar archivo
-curl -s --ssl-no-revoke -X PUT \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  https://api.github.com/repos/mblua/user-context/contents/ARCHIVO.md \
-  -d "{\"message\":\"Update\",\"content\":\"$CONTENT\",\"sha\":\"$SHA\"}"
-```
-
 ### Endpoints utiles
 
 | Operacion | Metodo | Endpoint |
@@ -120,3 +108,50 @@ curl -s --ssl-no-revoke -X PUT \
 - El contenido siempre va en base64
 - El mensaje de commit es requerido
 - Para archivos grandes, usar la Git Data API en lugar de Contents API
+
+---
+
+## Metodo 2: Edicion Web con JavaScript (para Claude for Chrome)
+
+### Problema
+
+El editor web de GitHub tiene auto-formateo que puede corromper el contenido markdown cuando se usa el comando `type` (simulacion de tipeo). Sintomas:
+
+- Agrega guiones (`-`) antes de los headings
+- Crea listas anidadas incorrectamente
+- Modifica la indentacion de manera impredecible
+
+### Solucion
+
+Usar JavaScript para setear el contenido directamente en el DOM, bypaseando el sistema de input del editor.
+
+### Pasos
+
+1. **Navegar al modo edicion** del archivo en GitHub
+
+2. **Identificar el elemento del editor** - GitHub usa un elemento con `[role="textbox"]` (no CodeMirror ni textarea comun)
+
+3. **Construir el contenido como string de JavaScript** usando `String.fromCharCode(10)` para los saltos de linea:
+
+```javascript
+var nl = String.fromCharCode(10);
+var content = "# Titulo" + nl + nl + "Parrafo de texto." + nl;
+```
+
+4. **Setear el contenido directamente**:
+
+```javascript
+document.querySelector('[role="textbox"]').textContent = content;
+```
+
+### Por que funciona
+
+- El metodo `.textContent` setea el contenido sin pasar por el event handler del editor
+- `String.fromCharCode(10)` evita problemas de sintaxis con template literals y caracteres especiales
+- El bypass del input handling evita el auto-formateo problematico
+
+### Notas importantes
+
+- Siempre verificar el Preview antes de commitear
+- Este metodo es util cuando el tipeo normal corrompe el formato
+- Funciona para archivos markdown, codigo, y cualquier otro tipo de archivo en GitHub
